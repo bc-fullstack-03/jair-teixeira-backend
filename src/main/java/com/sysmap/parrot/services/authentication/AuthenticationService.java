@@ -3,6 +3,7 @@ package com.sysmap.parrot.services.authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sysmap.parrot.entities.User;
@@ -16,18 +17,13 @@ public class AuthenticationService implements IAuthenticationService {
 	@Autowired
 	private IJwtService _jwtService;
 	@Autowired
-	private AuthenticationManager _authenticationManager;
+	private PasswordEncoder _passwordEncoder;
+
 	public AuthenticateResponse authenticate(AuthenticateRequest request) {
-		/*_authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(
-						request.getEmail(),
-						request.getPassword()
-				)
-		);*/
 		User user = _userService.getUser(request.getEmail());
-		
-		if(!user.getPassword().equals(request.getPassword())) {
-			throw new RuntimeException("Incorrect password!");
+
+		if (!_passwordEncoder.matches(request.password, user.getPassword())) {
+			throw new RuntimeException("Invalid credentials!");
 		}
 		
 		AuthenticateResponse response = new AuthenticateResponse();

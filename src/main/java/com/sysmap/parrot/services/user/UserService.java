@@ -3,6 +3,8 @@ package com.sysmap.parrot.services.user;
 import com.sysmap.parrot.services.enumeration.RoleEnum;
 import com.sysmap.parrot.services.security.IJwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +17,22 @@ public class UserService implements IUserService{
     private IUserRepository _userRepository;
     @Autowired
 	private IJwtService _jwtService;
-	//@Autowired
-	//private PasswordEncoder _passwordEncoder;
+	@Autowired
+	private UserDetailsService _userDetailsService;
+	@Autowired
+	private PasswordEncoder _passwordEncoder;
 
     public void createUser(CreateUserRequest request) {
-		//var passwordEncrypted = _passwordEncoder.encode(request.getPassword());
-        User user = new User(request.getName(), request.getEmail(), request.getPassword());
-		user.setRole(RoleEnum.USER);
+		var user = new User(request.getName(),
+							request.getEmail(),
+							_passwordEncoder.encode(request.getPassword()),
+							RoleEnum.USER);
 
-        if(_userRepository.findFirstUserByEmail(user.getEmail()).isPresent()) {
+		if(_userRepository.findFirstUserByEmail(user.getEmail()).isPresent()) {
         	throw new RuntimeException("User already exists!");
     	}
 
-		_userRepository.save(user);
+		_userRepository.save(user).getEmail();
     }
 	public FindUserResponse findUserByEmail(String email) {
 		User user = getUser(email);
@@ -39,18 +44,8 @@ public class UserService implements IUserService{
 	public User getUser(String email) {
 		if(_userRepository.findFirstUserByEmail(email).isEmpty()) {
         	throw new RuntimeException("User doesn't exist!");
-    	} 
+    	}
+
 		return _userRepository.findFirstUserByEmail(email).get();
 	}
-	/*
-	public List<FindUserResponse> findAll() {
-		List<User> users = _userRepository.findAll();
-		List<FindUserResponse> response = new ArrayList<FindUserResponse>(); 
-		System.out.println();
-		for(User user : users) {
-			response.add(new FindUserResponse(user.getId(), user.getName(), user.getEmail()));
-		}
-				
-		return response;
-	}*/
 }

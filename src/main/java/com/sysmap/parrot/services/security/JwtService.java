@@ -4,7 +4,6 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,7 @@ public class JwtService implements IJwtService{
 				.setSubject(userDetails.getUsername())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + expiration))
-				.signWith(getSignInKey(), SignatureAlgorithm.HS256)
+				.signWith(genSignInKey(), SignatureAlgorithm.HS256)
 				.compact();
 	}
 	public String generateToken(UserDetails userDetails) {
@@ -62,42 +61,14 @@ public class JwtService implements IJwtService{
 	}
 	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
 		final Claims claims = Jwts.parserBuilder()
-								.setSigningKey(getSignInKey())
+								.setSigningKey(genSignInKey())
 								.build()
 								.parseClaimsJws(token)
 								.getBody();
 		return claimsResolver.apply(claims);
 	}
-	private Key getSignInKey() {
+	private Key genSignInKey() {
 		byte[] keyBytes = Decoders.BASE64.decode(secretKey);
 		return Keys.hmacShaKeyFor(keyBytes);
 	}
-	/*public boolean isValidToken(String token, String userId) {
-		Claims claims = Jwts.parserBuilder().setSigningKey(getSignInKey())
-				.build().parseClaimsJws(token).getBody();
-		String subject = claims.getSubject();
-		Date timeExpiration = claims.getExpiration();
-
-		return subject.equals(userId) && timeExpiration.after(new Date());
-	}*/
-	/*public String generateToken(UUID userId) {
-		return Jwts
-				.builder()
-				.setSubject(userId.toString())
-				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-				.signWith(getSignInKey(), SignatureAlgorithm.HS256)
-				.compact();
-	}*/
-	/*private Claims extractAllClaims(String token) {
-		return Jwts
-				.parserBuilder()
-				.setSigningKey(getSignInKey())
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
-	}*/
-	/*private Date extractExpiration(String token) {
-		return extractClaim(token, Claims::getExpiration);
-	}*/
 }

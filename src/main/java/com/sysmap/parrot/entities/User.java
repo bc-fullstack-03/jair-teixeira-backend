@@ -20,11 +20,12 @@ public class User implements UserDetails {
     private String password;
     private RoleEnum role;
 
-    public User(String name, String email, String password) {
+    public User(String name, String email, String password, RoleEnum role) {
         setId();
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
     protected void setId() {
         this.id = UUID.randomUUID();
