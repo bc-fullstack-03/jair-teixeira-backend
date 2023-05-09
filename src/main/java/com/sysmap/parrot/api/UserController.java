@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.sysmap.parrot.services.security.IJwtService;
 import com.sysmap.parrot.services.user.CreateUserRequest;
 import com.sysmap.parrot.services.user.IUserService;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/v1/user")
@@ -26,14 +27,16 @@ public class UserController {
     public ResponseEntity<?> getUser(String email){
     	return ResponseEntity.ok().body(_userService.findUserByEmail(email));
     }
-    /*
-    public String getToken() {
-    	var token = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-    						.getRequest().getHeader("Authorization");
-    	return token.substring(7);
+    @PostMapping("/photo/upload")
+    public ResponseEntity uploadPhotoProfile(@RequestParam("photo") MultipartFile photo) {
+        try {
+            _userService.uploadPhotoProfile(photo);
+
+            return new ResponseEntity(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
     }
-    public String getUserId() {
-    	return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-    						.getRequest().getHeader("UserId");
-   	}*/
+
 }

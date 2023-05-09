@@ -1,15 +1,16 @@
 package com.sysmap.parrot.services.user;
 
 import com.sysmap.parrot.services.enumeration.RoleEnum;
+import com.sysmap.parrot.services.fileUpload.IFileUploadService;
 import com.sysmap.parrot.services.security.IJwtService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.sysmap.parrot.data.IUserRepository;
 import com.sysmap.parrot.entities.User;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserService implements IUserService{
@@ -18,11 +19,11 @@ public class UserService implements IUserService{
     @Autowired
 	private IJwtService _jwtService;
 	@Autowired
-	private UserDetailsService _userDetailsService;
-	@Autowired
 	private PasswordEncoder _passwordEncoder;
+	@Autowired
+	private IFileUploadService _fileUploadService;
 
-    public void createUser(CreateUserRequest request) {
+	public void createUser(CreateUserRequest request) {
 		var user = new User(request.getName(),
 							request.getEmail(),
 							_passwordEncoder.encode(request.getPassword()),
@@ -47,5 +48,22 @@ public class UserService implements IUserService{
     	}
 
 		return _userRepository.findFirstUserByEmail(email).get();
+	}
+
+	public void uploadPhotoProfile(MultipartFile photo) throws Exception {
+
+		var user = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+		var photoUri = "";
+
+		try {
+			var fileName = user.getId() + "." + photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf(".") + 1);
+			photoUri = _fileUploadService.upload(photo, fileName);
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+
+		}
+		user.setPhotoUri(photoUri);
+		_userRepository.save(user);
 	}
 }

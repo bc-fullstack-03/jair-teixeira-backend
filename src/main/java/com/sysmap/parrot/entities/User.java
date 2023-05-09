@@ -19,6 +19,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private RoleEnum role;
+    private String photoUri;
 
     public User(String name, String email, String password, RoleEnum role) {
         setId();
