@@ -7,12 +7,12 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class Friendship {
+public class FriendRequest {
     private UUID id;
-    private List<UUID> friendsList;
+    private List<UUID> friendRequestsList;
 
-    public Friendship(UUID id) {
+    public FriendRequest(UUID id) {
         this.id = id;
-        this.friendsList = new ArrayList<>();
+        this.friendRequestsList = new ArrayList<>();
     }
 }

@@ -1,5 +1,11 @@
 version: '3'
 services:
+  mongodb:
+    image: mongodb/mongodb-community-server:4.4.7-ubi8
+    container_name: "mongodb"
+    ports:
+      - "27070:27017"
+
   localstack:
     image: localstack/localstack
     container_name: localstack_demo
@@ -14,3 +20,4 @@ services:
     volumes:
       - ./tmp/localstack:/tmp/localstack
       - /var/run/docker.sock:/var/run/docker.sock
+
